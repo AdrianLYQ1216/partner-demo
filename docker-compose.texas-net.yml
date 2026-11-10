@@ -1,0 +1,18 @@
+# Optional overlay: attach to the Texas docker-compose network
+# (project name micro-todolist → network micro-todolist_todolist).
+#
+#   docker compose -f docker-compose.yml -f docker-compose.texas-net.yml up -d --build
+#
+# Gateway remains a host binary in the usual local setup, so GAME_API_BASE
+# still points at host.docker.internal:4000 unless you publish a gateway
+# service named `gateway` on this network.
+
+services:
+  partner-demo:
+    networks:
+      - todolist
+
+networks:
+  todolist:
+    external: true
+    name: micro-todolist_todolist

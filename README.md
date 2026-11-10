@@ -15,6 +15,28 @@ Listens on `LISTEN_ADDR` (default `:18088` — avoids Texas local `wallet` on `:
 
 Requires a reachable Texas gateway (`GAME_API_BASE`, default `http://127.0.0.1:4000`) with matching `PARTNER_*_SECRET` and `SERVICE_API_KEY`.
 
+## Docker (alongside local Texas)
+
+Texas compose only runs infra (MySQL/Redis/etcd/RabbitMQ); gateway/web stay on the host. The facade container reaches them via `host.docker.internal`.
+
+```bash
+cp .env.example .env   # align PARTNER_*_SECRET + SERVICE_API_KEY with Texas
+docker compose up -d --build
+```
+
+- Published port: **18088**
+- Health: `GET http://127.0.0.1:18088/healthz`
+- Optional join Texas network:  
+  `docker compose -f docker-compose.yml -f docker-compose.texas-net.yml up -d --build`
+
+From the Texas repo (sibling `../partner-demo`):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.partner-demo.yml up -d --build
+```
+
+Override in-container gateway/web with `DOCKER_GAME_API_BASE` / `DOCKER_WEB_BASE` (do not rely on `.env` `GAME_API_BASE=http://127.0.0.1:…` inside Docker).
+
 ## Env
 
 | Variable | Purpose |

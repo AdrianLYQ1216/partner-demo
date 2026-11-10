@@ -1,0 +1,9 @@
+.git
+.env
+bin/
+partner-demo
+*.exe
+.DS_Store
+README.md
+docker-compose*.yml
+Dockerfile

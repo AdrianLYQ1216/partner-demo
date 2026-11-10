@@ -1,0 +1,35 @@
+# Standalone partner-demo next to a local Texas stack.
+# Gateway/web usually run on the host (not in Texas compose), so default
+# GAME_API_BASE / WEB_BASE use host.docker.internal.
+#
+#   cp .env.example .env
+#   docker compose up -d --build
+#
+# Join Texas infra network (optional; gateway is still via host):
+#   docker compose -f docker-compose.yml -f docker-compose.texas-net.yml up -d --build
+
+services:
+  partner-demo:
+    build: .
+    image: partner-demo:local
+    container_name: partner-demo
+    restart: unless-stopped
+    ports:
+      - "18088:18088"
+    env_file:
+      - .env
+    environment:
+      # Do not interpolate GAME_API_BASE/WEB_BASE from .env (those are host-loopback
+      # for `go run`). Override at the shell if needed:
+      #   DOCKER_GAME_API_BASE=http://gateway:4000 docker compose up -d
+      LISTEN_ADDR: ":18088"
+      GAME_API_BASE: ${DOCKER_GAME_API_BASE:-http://host.docker.internal:4000}
+      WEB_BASE: ${DOCKER_WEB_BASE:-http://host.docker.internal:5173}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:18088/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
